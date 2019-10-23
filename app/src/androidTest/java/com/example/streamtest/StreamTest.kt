@@ -6,6 +6,7 @@ import java.util.*
 import java.util.function.BinaryOperator
 import java.util.stream.*
 import kotlin.Comparator
+import kotlin.collections.ArrayList
 
 
 /**
@@ -138,7 +139,7 @@ class StreamTest {
      * 里面已经没有list了
      */
     @Test
-    fun testFlatMap() {
+    fun testFlatMap2() {
         val stream = Stream.of(
             Arrays.asList(1),
             Arrays.asList(2, 3),
@@ -152,6 +153,36 @@ class StreamTest {
                     t
                 }
             }
+            .forEach(System.out::println)
+    }
+
+    @Test
+    fun testFlatMap() {
+        val list1 = arrayListOf<Person>()
+        list1.add(Person("zsc", "nan", 13, 270000))
+        list1.add(Person("fj", "nan", 23, 250000))
+        list1.add(Person("csx", "nan", 19, 280000))
+        list1.add(Person("xxx", "nv", 18, 240000))
+        val list2 = arrayListOf<Person>()
+        list2.add(Person("ll", "nan", 15, 270000))
+        list2.add(Person("jj", "nan", 33, 250000))
+        list2.add(Person("ss", "nan", 14, 280000))
+        list2.add(Person("sh", "nv", 58, 240000))
+        val list3 = arrayListOf<Person>()
+        list3.add(Person("mm", "nan", 15, 27000))
+        list3.add(Person("ii", "nan", 33, 25000))
+        list3.add(Person("poo", "nan", 14, 2000))
+        list3.add(Person("shs", "nv", 58, 2400))
+        val list4 = arrayListOf<ArrayList<Person>>()
+        list4.addAll(listOf(list1))
+        list4.addAll(listOf(list2))
+        list4.addAll(listOf(list3))
+        //把Stream中的层级结构扁平化并返回Stream
+        val stream = list4.stream()
+            .flatMap { childList -> childList.stream() }
+            .collect(Collectors.toList())
+        //展开多个List合并到一个新list
+        stream.stream()
             .forEach(System.out::println)
     }
 
@@ -175,8 +206,9 @@ class StreamTest {
         val arrayListOf = arrayListOf<Int>()
         val list = Stream.of(1, 2, 3, 4, 5)
             .filter { n -> n > 3 }
-            .peek{
-                arrayListOf.add(it + 2 )
+            .peek {
+                it + 2
+                arrayListOf.add(it + 2)
                 println("it:" + it)
             }
             .map { k -> k * k }
@@ -231,33 +263,32 @@ class StreamTest {
             .limit(3)
             .peek(System.out::println)
             .collect(Collectors.toList())
-        println("测试："+ list)
+        println("测试：" + list)
     }
 
     /**
      * skip 操作符
      */
     @Test
-    fun testSkip(){
+    fun testSkip() {
         val list = Stream.of(2, 1, 3, 6, 7, 8, 4, 5, 9)
             .skip(3)
             .peek(System.out::println)
             .collect(Collectors.toList())
-        println("测试："+ list)
+        println("测试：" + list)
     }
 
     /**
      * sorted 操作符
      */
     @Test
-    fun testSorted(){
+    fun testSorted() {
         val persons = arrayListOf<Person>()
         persons.add(Person("zsc", "nan", 13, 17000))
         persons.add(Person("fj", "nan", 23, 15000))
         persons.add(Person("xsd", "nv", 18, 160000))
         persons.add(Person("csx", "nan", 19, 18000))
         persons.add(Person("xxx", "nv", 18, 14000))
-        val timeMillis = System.currentTimeMillis()
         val curPersons = persons.parallelStream()
             .sorted { o1, o2 -> o2.age.compareTo(o1.age) }
             .collect(Collectors.toList())
@@ -268,15 +299,30 @@ class StreamTest {
      * match 相关操作符
      */
     @Test
-    fun  testMatch(){
+    fun testMatch() {
         val allMatch = Stream.of(3, 4, 5)
             .allMatch { n -> n > 4 }
         println("测试1：" + allMatch)
+        val list = arrayListOf<String>()
+        val allMat = list.stream().allMatch {
+            TextUtils.equals(it, "c")
+        }
+        println("测试2：" + allMat)
         val anyMatch = Stream.of(3, 4, 5)
             .anyMatch { n -> n > 4 }
-        println("测试2：" + anyMatch)
+        println("测试3：" + anyMatch)
+        val anyMatch1 = list.stream()
+            .anyMatch {
+                TextUtils.equals(it, "c")
+            }
+        println("测试4：" + anyMatch1)
         val noneMatch = Stream.of(3, 4, 5)
             .noneMatch { n -> n > 4 }
-        println("测试3：" + noneMatch)
+        println("测试5：" + noneMatch)
+        val noneMatch1 = list.stream()
+            .noneMatch {
+                TextUtils.equals(it, "c")
+            }
+        println("测试6：" + noneMatch1)
     }
 }
